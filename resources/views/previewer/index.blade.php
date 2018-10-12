@@ -1,9 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="title m-b-md">
-        Image Previewer
-    </div>
+    <previewer-component></previewer-component>
 @endsection
 
 

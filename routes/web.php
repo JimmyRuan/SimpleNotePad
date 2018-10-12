@@ -16,3 +16,4 @@ Route::get('/', function () {
 });
 
 Route::get('/preview', 'PreviewerController@index')->name('previewer.index');
+Route::post('/preview', 'PreviewerController@store')->name('previewer.store');
