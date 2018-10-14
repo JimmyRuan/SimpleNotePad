@@ -7,6 +7,6 @@
 
     <div class="links">
         <a href="{{route('previewer.index')}}">Image Previewer</a>
-        <a href="{{route('previewer.index')}}">Note Taker</a>
+        <a href="{{route('note.index')}}">Note Taker</a>
     </div>
 @endsection

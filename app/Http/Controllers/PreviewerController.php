@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
@@ -14,7 +16,7 @@ class PreviewerController extends Controller
         return view('previewer.index');
     }
 
-    public function store(Request $request)
+    public function store(Request $request) : JsonResponse
     {
         $fileName = 'image';
 

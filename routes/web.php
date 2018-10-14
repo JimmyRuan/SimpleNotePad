@@ -13,7 +13,14 @@
 
 Route::get('/', function () {
     return view('home');
-});
+})->name('home');
 
 Route::get('/preview', 'PreviewerController@index')->name('previewer.index');
 Route::post('/preview', 'PreviewerController@store')->name('previewer.store');
+
+Route::get('/notes', 'NoteController@index')->name('note.index');
+Route::get('/notes/list', 'NoteController@list')->name('note.list');
+Route::post('/notes', 'NoteController@store')->name('note.store');
+Route::patch('/notes/{id}/color', 'NoteController@updateColor')
+            ->where('id', '[0-9]+')
+            ->name('note.update-color');

@@ -5,6 +5,8 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
+//import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
 require('./bootstrap');
 
 window.Vue = require('vue');
@@ -18,6 +20,7 @@ window.Vue = require('vue');
 //Vue.component('example-component', require('./components/ExampleComponent.vue'));
 
 Vue.component('previewer-component', require('./components/PreviewerComponent.vue'));
+Vue.component('note-component', require('./components/NoteComponent.vue'));
 
 const app = new Vue({
     el: '#app'
