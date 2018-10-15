@@ -4,13 +4,16 @@
             <h3>My Notepad</h3>
             <div class="col-md-12 justify-content-center">
                 <input class="note-input form-control center"
-                       v-bind:style="{background: selectedColor.back, color: selectedColor.color}"
-                       v-model="title" placeholder="Add note title">
+                       v-bind:style="{background: currentNote.color.back, color: currentNote.color.color}"
+                       v-model="currentNote.title" placeholder="Add note title">
             </div>
             <div class="col-md-12">
                 <textarea class="note-input form-control center note-body"
-                          v-bind:style="{background: selectedColor.back, color: selectedColor.color}"
-                          v-model="content" placeholder="add note content"></textarea>
+                          v-bind:style="{
+                          background: currentNote.color.back,
+                          color: currentNote.color.color
+                          }"
+                          v-model="currentNote.content" placeholder="add note content"></textarea>
             </div>
             <div class="col-md-12">
                 <div>
@@ -19,12 +22,19 @@
                        v-on:click="pickMainColor(item)"
                        v-bind:style="{color: item.back, background: 'lightblue'}"></i>
                 </div>
-                <button class="btn btn-primary" v-on:click="store">Add</button>
+
+                <div v-if="isEdit">
+                    <button class="btn btn-primary" v-on:click="updateNote">Edit</button>
+                    <button class="btn btn-primary" v-on:click="cancelEdit">Cancel</button>
+                </div>
+
+                <button v-else class="btn btn-primary" v-on:click="store">Add</button>
             </div>
         </div>
 
 
         <div v-for="noteItem in noteItems"
+             v-if="noteItem.id !== currentNote.id"
              v-bind:style="{color: noteItem.color.color, background: noteItem.color.back}"
              class="col-md-3 card note-item mt-3 ml-3">
             <div class="card-body">
@@ -36,9 +46,16 @@
                        v-on:click="pickItemColor(colorItem, noteItem.id)"
                        v-bind:style="{color: colorItem.back, background: noteItem.color.back}"></i>
                 </div>
-                <div><i class="fa fa-trash pointer"
+                <div>
+                    <i class="fa fa-trash pointer"
                         v-on:click="deleteNote(noteItem.id)"
-                        aria-hidden="true"></i></div>
+                        aria-hidden="true"></i>
+
+                    <i class="fa fa-edit pointer"
+                       v-on:click="editNote(noteItem)"
+                       aria-hidden="true"></i>
+
+                </div>
             </div>
         </div>
 
@@ -46,16 +63,21 @@
 </template>
 
 <script>
+
+    const defaultNote = {
+        id: null,
+        title: null,
+        content: null,
+        color: {back: '#7FDBFF', color: 'hsla(197, 100%, 20%, 1.0)'}
+    };
     export default {
         props: {
            notes: Array
         },
         data() {
             return {
-                title: null,
-                content: null,
+                currentNote: defaultNote,
                 noteItems: [],
-                selectedColor: {back: '#7FDBFF', color: 'hsla(197, 100%, 20%, 1.0)'},
                 colors: [
                     {back: '#001f3f', color: 'hsla(210, 100%, 75%, 1.0)'},
                     {back: '#0074D9', color: 'hsla(210, 100%, 75%, 1.0)'},
@@ -65,7 +87,8 @@
                     {back: '#01FF70', color: 'hsla(146, 100%, 20%, 1.0)'},
                     {back: '#FFDC00', color: 'hsla(52, 100%, 20%, 1.0)'},
                     {back: '#7FDBFF', color: 'hsla(197, 100%, 20%, 1.0)'}
-                ]
+                ],
+                isEdit: false
             }
 
         },
@@ -74,16 +97,15 @@
                 const _this = this;
 
                 axios.post('/notes', {
-                    'title': this.title,
-                    'content': this.content,
-                    'color': JSON.stringify(this.selectedColor)
+                    'title': this.currentNote.title,
+                    'content': this.currentNote.content,
+                    'color': JSON.stringify(this.currentNote.color)
                 })
                 .then(function(response) {
-                    console.log(response);
                     const note = reformatNote(response.data.data);
                     _this.noteItems.unshift(note);
-                    _this.title = null;
-                    _this.content = null;
+                    _this.currentNote.title = null;
+                    _this.currentNote.content = null;
                 })
                 .catch(function(error) {
                     console.error(error);
@@ -93,8 +115,6 @@
                 const _this = this;
                 axios.get('/notes/list')
                 .then(function(response) {
-                    console.log(response.data.data);
-                    window.banana = response.data.data;
                     _this.noteItems = response.data.data.map(
                         item => reformatNote(item)
                     );
@@ -104,7 +124,7 @@
                 });
             },
             pickMainColor: function(color){
-                this.selectedColor = color;
+                this.currentNote.color = color;
 
             },
             pickItemColor: function(color, index){
@@ -130,10 +150,40 @@
                 });
 
                 axios.delete(`/notes/${index}`)
-                .then(function(response){console.log(response)})
                 .catch(function(error) {
                     console.error(error);
                 });
+            },
+            editNote: function(note){
+                console.log('editing note now ' + note.index);
+                this.isEdit = true;
+                this.currentNote = note;
+            },
+            updateNote: function(){
+                const _this = this;
+                axios.patch(`/notes/${this.currentNote.id}`, {
+                    'id': this.currentNote.id,
+                    'title': this.currentNote.title,
+                    'content': this.currentNote.content,
+                    'color': JSON.stringify(this.currentNote.color)
+                })
+                .then(function(response){
+                    _this.noteItems = _this.noteItems.map(function(item){
+                        if(item.id === _this.currentNote.id)
+                        {
+                            return _.merge(_this.currentNote, {excerpt: getExcerpt(_this.currentNote.content)});
+                        }
+                        return item;
+                    });
+                    _this.cancelEdit();
+                })
+                .catch(function(error) {
+                    console.error(error);
+                });
+            },
+            cancelEdit: function(){
+                this.isEdit = false;
+                this.currentNote = defaultNote;
             }
         },
         created() {
@@ -189,7 +239,7 @@
     }
 
     .note-body{
-        height: 150px;
+        height: 250px;
     }
 
     i:hover{

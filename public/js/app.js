@@ -14312,8 +14312,6 @@ module.exports = __webpack_require__(56);
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-//import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-
 __webpack_require__(16);
 
 window.Vue = __webpack_require__(39);
@@ -48814,7 +48812,7 @@ exports = module.exports = __webpack_require__(12)(false);
 
 
 // module
-exports.push([module.i, "\n.note-input{\n    width: 100%;\n    max-width: 500px;\n    text-align: center;\n}\n.note-item{\n    cursor: pointer;\n    width: 18rem;\n}\n.main{\n    background-color: lightblue;\n    padding: 50px;\n    color: black;\n}\n.card-text{\n    text-align: justify;\n}\n.pointer {\n    cursor: pointer;\n}\n.center{\n    margin: auto;\n}\n.note-body{\n    height: 150px;\n}\ni:hover{\n    font-size: 2em;\n}\n", ""]);
+exports.push([module.i, "\n.note-input{\n    width: 100%;\n    max-width: 500px;\n    text-align: center;\n}\n.note-item{\n    cursor: pointer;\n    width: 18rem;\n}\n.main{\n    background-color: lightblue;\n    padding: 50px;\n    color: black;\n}\n.card-text{\n    text-align: justify;\n}\n.pointer {\n    cursor: pointer;\n}\n.center{\n    margin: auto;\n}\n.note-body{\n    height: 250px;\n}\ni:hover{\n    font-size: 2em;\n}\n", ""]);
 
 // exports
 
@@ -48872,18 +48870,41 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
+
+var defaultNote = {
+    id: null,
+    title: null,
+    content: null,
+    color: { back: '#7FDBFF', color: 'hsla(197, 100%, 20%, 1.0)' }
+};
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: {
         notes: Array
     },
     data: function data() {
         return {
-            title: null,
-            content: null,
+            currentNote: defaultNote,
             noteItems: [],
-            selectedColor: { back: '#7FDBFF', color: 'hsla(197, 100%, 20%, 1.0)' },
-            colors: [{ back: '#001f3f', color: 'hsla(210, 100%, 75%, 1.0)' }, { back: '#0074D9', color: 'hsla(210, 100%, 75%, 1.0)' }, { back: '#FF851B', color: 'hsla(28, 100%, 20%, 1.0)' }, { back: '#111', color: '#ddd' }, { back: '#B10DC9', color: 'hsla(292, 88%, 82%, 1.0)' }, { back: '#01FF70', color: 'hsla(146, 100%, 20%, 1.0)' }, { back: '#FFDC00', color: 'hsla(52, 100%, 20%, 1.0)' }, { back: '#7FDBFF', color: 'hsla(197, 100%, 20%, 1.0)' }]
+            colors: [{ back: '#001f3f', color: 'hsla(210, 100%, 75%, 1.0)' }, { back: '#0074D9', color: 'hsla(210, 100%, 75%, 1.0)' }, { back: '#FF851B', color: 'hsla(28, 100%, 20%, 1.0)' }, { back: '#111', color: '#ddd' }, { back: '#B10DC9', color: 'hsla(292, 88%, 82%, 1.0)' }, { back: '#01FF70', color: 'hsla(146, 100%, 20%, 1.0)' }, { back: '#FFDC00', color: 'hsla(52, 100%, 20%, 1.0)' }, { back: '#7FDBFF', color: 'hsla(197, 100%, 20%, 1.0)' }],
+            isEdit: false
         };
     },
 
@@ -48892,15 +48913,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var _this = this;
 
             axios.post('/notes', {
-                'title': this.title,
-                'content': this.content,
-                'color': JSON.stringify(this.selectedColor)
+                'title': this.currentNote.title,
+                'content': this.currentNote.content,
+                'color': JSON.stringify(this.currentNote.color)
             }).then(function (response) {
-                console.log(response);
                 var note = reformatNote(response.data.data);
                 _this.noteItems.unshift(note);
-                _this.title = null;
-                _this.content = null;
+                _this.currentNote.title = null;
+                _this.currentNote.content = null;
             }).catch(function (error) {
                 console.error(error);
             });
@@ -48908,8 +48928,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         showNotes: function showNotes() {
             var _this = this;
             axios.get('/notes/list').then(function (response) {
-                console.log(response.data.data);
-                window.banana = response.data.data;
                 _this.noteItems = response.data.data.map(function (item) {
                     return reformatNote(item);
                 });
@@ -48918,7 +48936,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         },
         pickMainColor: function pickMainColor(color) {
-            this.selectedColor = color;
+            this.currentNote.color = color;
         },
         pickItemColor: function pickItemColor(color, index) {
 
@@ -48940,13 +48958,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 return item.id !== index;
             });
 
-            console.log('I am here at 132');
-
-            axios.delete('/notes/' + index).then(function (response) {
-                console.log(response);
+            axios.delete('/notes/' + index).catch(function (error) {
+                console.error(error);
+            });
+        },
+        editNote: function editNote(note) {
+            console.log('editing note now ' + note.index);
+            this.isEdit = true;
+            this.currentNote = note;
+        },
+        updateNote: function updateNote() {
+            var _this = this;
+            axios.patch('/notes/' + this.currentNote.id, {
+                'id': this.currentNote.id,
+                'title': this.currentNote.title,
+                'content': this.currentNote.content,
+                'color': JSON.stringify(this.currentNote.color)
+            }).then(function (response) {
+                _this.noteItems = _this.noteItems.map(function (item) {
+                    if (item.id === _this.currentNote.id) {
+                        return _.merge(_this.currentNote, { excerpt: getExcerpt(_this.currentNote.content) });
+                    }
+                    return item;
+                });
+                _this.cancelEdit();
             }).catch(function (error) {
                 console.error(error);
             });
+        },
+        cancelEdit: function cancelEdit() {
+            this.isEdit = false;
+            this.currentNote = defaultNote;
         }
     },
     created: function created() {
@@ -48990,23 +49032,23 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.title,
-                expression: "title"
+                value: _vm.currentNote.title,
+                expression: "currentNote.title"
               }
             ],
             staticClass: "note-input form-control center",
             style: {
-              background: _vm.selectedColor.back,
-              color: _vm.selectedColor.color
+              background: _vm.currentNote.color.back,
+              color: _vm.currentNote.color.color
             },
             attrs: { placeholder: "Add note title" },
-            domProps: { value: _vm.title },
+            domProps: { value: _vm.currentNote.title },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.title = $event.target.value
+                _vm.$set(_vm.currentNote, "title", $event.target.value)
               }
             }
           })
@@ -49018,23 +49060,23 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.content,
-                expression: "content"
+                value: _vm.currentNote.content,
+                expression: "currentNote.content"
               }
             ],
             staticClass: "note-input form-control center note-body",
             style: {
-              background: _vm.selectedColor.back,
-              color: _vm.selectedColor.color
+              background: _vm.currentNote.color.back,
+              color: _vm.currentNote.color.color
             },
             attrs: { placeholder: "add note content" },
-            domProps: { value: _vm.content },
+            domProps: { value: _vm.currentNote.content },
             on: {
               input: function($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.content = $event.target.value
+                _vm.$set(_vm.currentNote, "content", $event.target.value)
               }
             }
           })
@@ -49056,66 +49098,98 @@ var render = function() {
             })
           ),
           _vm._v(" "),
-          _c(
-            "button",
-            { staticClass: "btn btn-primary", on: { click: _vm.store } },
-            [_vm._v("Add")]
-          )
+          _vm.isEdit
+            ? _c("div", [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    on: { click: _vm.updateNote }
+                  },
+                  [_vm._v("Edit")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    on: { click: _vm.cancelEdit }
+                  },
+                  [_vm._v("Cancel")]
+                )
+              ])
+            : _c(
+                "button",
+                { staticClass: "btn btn-primary", on: { click: _vm.store } },
+                [_vm._v("Add")]
+              )
         ])
       ]),
       _vm._v(" "),
       _vm._l(_vm.noteItems, function(noteItem) {
-        return _c(
-          "div",
-          {
-            staticClass: "col-md-3 card note-item mt-3 ml-3",
-            style: {
-              color: noteItem.color.color,
-              background: noteItem.color.back
-            }
-          },
-          [
-            _c("div", { staticClass: "card-body" }, [
-              _c("h5", { staticClass: "card-title" }, [
-                _vm._v(_vm._s(noteItem.title))
-              ]),
-              _vm._v(" "),
-              _c("p", { staticClass: "card-text" }, [
-                _vm._v(_vm._s(noteItem.excerpt))
-              ]),
-              _vm._v(" "),
-              _c(
-                "div",
-                _vm._l(_vm.colors, function(colorItem) {
-                  return _c("i", {
-                    staticClass: "fa fa-circle pointer",
-                    style: {
-                      color: colorItem.back,
-                      background: noteItem.color.back
-                    },
-                    on: {
-                      click: function($event) {
-                        _vm.pickItemColor(colorItem, noteItem.id)
+        return noteItem.id !== _vm.currentNote.id
+          ? _c(
+              "div",
+              {
+                staticClass: "col-md-3 card note-item mt-3 ml-3",
+                style: {
+                  color: noteItem.color.color,
+                  background: noteItem.color.back
+                }
+              },
+              [
+                _c("div", { staticClass: "card-body" }, [
+                  _c("h5", { staticClass: "card-title" }, [
+                    _vm._v(_vm._s(noteItem.title))
+                  ]),
+                  _vm._v(" "),
+                  _c("p", { staticClass: "card-text" }, [
+                    _vm._v(_vm._s(noteItem.excerpt))
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    _vm._l(_vm.colors, function(colorItem) {
+                      return _c("i", {
+                        staticClass: "fa fa-circle pointer",
+                        style: {
+                          color: colorItem.back,
+                          background: noteItem.color.back
+                        },
+                        on: {
+                          click: function($event) {
+                            _vm.pickItemColor(colorItem, noteItem.id)
+                          }
+                        }
+                      })
+                    })
+                  ),
+                  _vm._v(" "),
+                  _c("div", [
+                    _c("i", {
+                      staticClass: "fa fa-trash pointer",
+                      attrs: { "aria-hidden": "true" },
+                      on: {
+                        click: function($event) {
+                          _vm.deleteNote(noteItem.id)
+                        }
                       }
-                    }
-                  })
-                })
-              ),
-              _vm._v(" "),
-              _c("div", [
-                _c("i", {
-                  staticClass: "fa fa-trash pointer",
-                  attrs: { "aria-hidden": "true" },
-                  on: {
-                    click: function($event) {
-                      _vm.deleteNote(noteItem.id)
-                    }
-                  }
-                })
-              ])
-            ])
-          ]
-        )
+                    }),
+                    _vm._v(" "),
+                    _c("i", {
+                      staticClass: "fa fa-edit pointer",
+                      attrs: { "aria-hidden": "true" },
+                      on: {
+                        click: function($event) {
+                          _vm.editNote(noteItem)
+                        }
+                      }
+                    })
+                  ])
+                ])
+              ]
+            )
+          : _vm._e()
       })
     ],
     2

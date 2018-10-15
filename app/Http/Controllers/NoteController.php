@@ -51,5 +51,14 @@ class NoteController extends Controller
         return response()->json('', Response::HTTP_OK);
     }
 
+    public function update(UpdateNote $request, $id): JsonResponse
+    {
+        $validated = $request->validated();
+        $note = Note::findOrFail($id);
+        $note->update($validated);
+
+        return response()->json('', Response::HTTP_OK);
+    }
+
 
 }
