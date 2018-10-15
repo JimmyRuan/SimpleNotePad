@@ -48869,6 +48869,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: {
@@ -48928,8 +48931,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
             axios.patch('/notes/' + index + '/color', {
                 'color': JSON.stringify(color)
-            }).then(function (response) {
-                //console.log(response);
+            }).catch(function (error) {
+                console.error(error);
+            });
+        },
+        deleteNote: function deleteNote(index) {
+            this.noteItems = this.noteItems.filter(function (item) {
+                return item.id !== index;
+            });
+
+            console.log('I am here at 132');
+
+            axios.delete('/notes/' + index).then(function (response) {
+                console.log(response);
             }).catch(function (error) {
                 console.error(error);
             });
@@ -49086,7 +49100,19 @@ var render = function() {
                     }
                   })
                 })
-              )
+              ),
+              _vm._v(" "),
+              _c("div", [
+                _c("i", {
+                  staticClass: "fa fa-trash pointer",
+                  attrs: { "aria-hidden": "true" },
+                  on: {
+                    click: function($event) {
+                      _vm.deleteNote(noteItem.id)
+                    }
+                  }
+                })
+              ])
             ])
           ]
         )

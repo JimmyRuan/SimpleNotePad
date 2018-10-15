@@ -36,6 +36,9 @@
                        v-on:click="pickItemColor(colorItem, noteItem.id)"
                        v-bind:style="{color: colorItem.back, background: noteItem.color.back}"></i>
                 </div>
+                <div><i class="fa fa-trash pointer"
+                        v-on:click="deleteNote(noteItem.id)"
+                        aria-hidden="true"></i></div>
             </div>
         </div>
 
@@ -116,13 +119,21 @@
                 axios.patch(`/notes/${index}/color`, {
                     'color': JSON.stringify(color)
                 })
-                .then(function(response) {
-                    //console.log(response);
-                })
                 .catch(function(error) {
                     console.error(error);
                 });
 
+            },
+            deleteNote: function(index){
+                this.noteItems = this.noteItems.filter(function(item){
+                    return item.id !== index;
+                });
+
+                axios.delete(`/notes/${index}`)
+                .then(function(response){console.log(response)})
+                .catch(function(error) {
+                    console.error(error);
+                });
             }
         },
         created() {

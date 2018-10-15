@@ -24,3 +24,7 @@ Route::post('/notes', 'NoteController@store')->name('note.store');
 Route::patch('/notes/{id}/color', 'NoteController@updateColor')
             ->where('id', '[0-9]+')
             ->name('note.update-color');
+
+Route::delete('/notes/{id}', 'NoteController@delete')
+            ->where('id', '[0-9]+')
+            ->name('note.delete');

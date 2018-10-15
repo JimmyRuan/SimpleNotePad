@@ -41,7 +41,14 @@ class NoteController extends Controller
         $note->color = $validated['color'];
         $note->save();
 
-        return NoteResource::make($note)->response($request);
+        return response()->json('', Response::HTTP_OK);
+    }
+
+    public function delete(Request $request, $id): JsonResponse
+    {
+        Note::findOrFail($id)->delete();
+
+        return response()->json('', Response::HTTP_OK);
     }
 
 
